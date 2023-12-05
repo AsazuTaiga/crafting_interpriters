@@ -1,12 +1,12 @@
-// このコードでは crafting interpretersという本の内容を写経しています。 
+// このコードでは crafting interpretersという本の内容を写経しています。
 // しかし、本ではサンプルコードがJavaで書かれているので、Rustで書き直しています。
 
+use std::cell::RefCell;
 use std::env;
-use std::process;
 use std::fs;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
-use std::cell::RefCell;
+use std::process;
 use std::rc::Rc;
 
 mod token;
@@ -23,7 +23,6 @@ impl Lox {
     /// Pathオブジェクトを生成している。
     /// `fs::read_to_string`は、Pathオブジェクトを元にファイルの内容を文字列として読み込む。
     fn run_file(&self, path: &String) -> Result<(), io::Error> {
-
         let bytes = fs::read_to_string(Path::new(&path))?;
         self.run(&bytes);
         Ok(())
@@ -33,7 +32,7 @@ impl Lox {
         let stdin = io::stdin();
         let mut reader = stdin.lock();
         let mut buffer = String::new();
-    
+
         loop {
             print!("> ");
             io::stdout().flush()?;
@@ -41,20 +40,15 @@ impl Lox {
             if reader.read_line(&mut buffer)? == 0 {
                 break;
             }
-            
+
             self.run(&buffer);
             buffer.clear();
         }
-    
+
         Ok(())
     }
 
-    // Q. このコードは何をしているのか？
-    // A. このコードは、エラーが発生した場合に、
-    //   そのエラーを呼び出し元に返すためのもの。
-    // Rcは、参照カウントを行うための型。
-    // RefCellは、可変の値を持つことができる型。
-    fn new () -> Lox {
+    fn new() -> Lox {
         Lox {
             had_error: Rc::new(RefCell::new(false)),
         }
@@ -63,7 +57,7 @@ impl Lox {
     fn error(&self, line: usize, message: &str) {
         self.report(line, "", message);
     }
-    
+
     fn report(&self, line: usize, location: &str, message: &str) {
         eprintln!("[line {}] Error{}: {}", line, location, message);
         *self.had_error.borrow_mut() = true;
@@ -73,14 +67,9 @@ impl Lox {
     /// TODO: トークンを表示する構造体とそれらのトークンを生成するScanaer構造体を作成する。
     fn run(&self, source: &String) {
         // 後で実装する
-        // 
+        //
+    }
 }
-
-
-    
-}
-
-
 
 // Javaコード
 // private static void run(String source) {
@@ -94,13 +83,8 @@ impl Lox {
 //   }
 
 // Rustコード
-struct Scanner {
-    
-}
-struct Token {
-    
-}
-
+struct Scanner {}
+struct Token {}
 
 /// このコードは、コマンドライン引数を受け取り、
 /// 引数が1つの場合はrun_file関数を呼び出し、
@@ -108,7 +92,7 @@ struct Token {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let lox = Lox::new();
-    
+
     match args.len() {
         2 => {
             if let Err(e) = lox.run_file(&args[1]) {
@@ -127,7 +111,7 @@ fn main() {
             process::exit(64); // エラーコード64で終了
         }
     }
-    
+
     if *lox.had_error.borrow() {
         process::exit(65); // スキャンまたはパースエラーがあった場合の終了コード
     }
