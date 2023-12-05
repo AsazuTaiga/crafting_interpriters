@@ -64,8 +64,8 @@ public class Lox {
    * 
    * @param string
    */
-  private static void run(String string) {
-    Scanner scanner = new Scanner();
+  private static void run(String source) {
+    Scanner scanner = new Scanner(source);
     List<Token> tokens = scanner.scanTokens();
 
     // とりあえずコンソールにはく
