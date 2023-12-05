@@ -1,1 +1,1 @@
-# Crafitng Interpriters 勉強用レポジトリ
+# Crafitng Interpreters 勉強用レポジトリ
