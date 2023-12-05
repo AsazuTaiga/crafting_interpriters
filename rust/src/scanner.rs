@@ -32,7 +32,14 @@ impl<'a> Scanner<'a> {
     }
 
     pub fn scan_tokens(&mut self) {
-        // TODO
+        while !self.is_at_end() {
+            start = current;
+            self.scan_token();
+        }
+
+        self.tokens
+            .push(Token::new(TokenType::EOF, "", None, self.line));
+        return self.tokens;
     }
 
     fn is_at_end(&self) -> bool {
