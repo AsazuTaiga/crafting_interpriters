@@ -62,11 +62,65 @@ class Scanner {
       case '*':
         addToken(STAR);
         break;
+      case '!':
+        addToken(match('=') ? BANG_EQUAL : BANG);
+        break;
+      case '=':
+        addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+        break;
+      case '<':
+        addToken(match('=') ? LESS_EQUAL : LESS);
+        break;
+      case '>':
+        addToken(match('=') ? GREATER_EQUAL : GREATER);
+        break;
+      case '/':
+        if (match('/')) {
+          // コメントが行末まで続くのそこまで進める
+          while (peek() != '\n' && !isAtEnd())
+            advance();
+        } else {
+          addToken(SLASH);
+        }
+        break;
+
+      // ホワイトスペース
+      case ' ':
+      case '\r':
+      case '\t':
+        break;
+
+      // 改行
+      case '\n':
+        line++;
+        break;
 
       default:
         Lox.error(line, "Unexpected character.");
         break;
     }
+  }
+
+  /**
+   * 条件付きの advance() のようなもの。マッチした場合は次にカーソルを動かしつつ、マッチしたことを返却。
+   * 
+   * @param expected currentがそれであるかどうか確認したい文字
+   * @return マッチしたかどうか
+   */
+  private boolean match(char expected) {
+    if (isAtEnd())
+      return false;
+    if (source.charAt(current) != expected)
+      return false;
+
+    current++;
+    return true;
+  }
+
+  private char peek() {
+    if (isAtEnd())
+      return '\0'; // 終端文字
+    return source.charAt(current);
   }
 
   private boolean isAtEnd() {

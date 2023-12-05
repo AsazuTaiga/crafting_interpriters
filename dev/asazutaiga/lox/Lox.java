@@ -55,7 +55,7 @@ public class Lox {
       if (line == null)
         break;
       run(line);
-      hadError = false;
+      hadError = false; // エラーフラグは立てるが、実行は止めない。その後の部分にエラーがある場合にユーザーに報告したいので。
     }
   }
 
