@@ -29,6 +29,7 @@ class Scanner {
   }
 
   private void scanToken() {
+    // とりあえず全てのトークンが１文字であると想定して書いた
     char c = advance();
     switch (c) {
       case '(':
