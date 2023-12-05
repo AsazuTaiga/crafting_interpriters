@@ -109,7 +109,7 @@ class Scanner {
   private void string() {
     while (peek() != '"' && !isAtEnd()) {
       if (peek() == '\n')
-        line++;
+        line++; // NOTE: Loxは複数行の文字列をサポートします
       advance();
     }
 
