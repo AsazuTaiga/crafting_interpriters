@@ -1,6 +1,7 @@
 // このコードでは crafting interpretersという本の内容を写経しています。
 // しかし、本ではサンプルコードがJavaで書かれているので、Rustで書き直しています。
 
+use scanner::Scanner;
 use std::cell::RefCell;
 use std::env;
 use std::fs;
@@ -67,8 +68,8 @@ impl Lox {
     /// 与えられたソースコードからトークンをスキャンし、それらを一つずつ表示する。
     /// TODO: トークンを表示する構造体とそれらのトークンを生成するScanaer構造体を作成する。
     fn run(&self, source: &String) {
-        // 後で実装する
-        //
+        let mut scanner = Scanner::new(&source);
+        let tokens = scanner.scan_tokens();
     }
 }
 
@@ -82,10 +83,6 @@ impl Lox {
 //       System.out.println(token);
 //     }
 //   }
-
-// Rustコード
-struct Scanner {}
-struct Token {}
 
 /**
 このコードは、コマンドライン引数を受け取り、
