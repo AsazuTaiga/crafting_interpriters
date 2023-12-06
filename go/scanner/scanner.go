@@ -7,6 +7,25 @@ import (
 	"github.com/AsazuTaiga/crafting_interpriters/go/token"
 )
 
+var keywords = map[string]token.TokenType{
+	"and":    token.AND,
+	"class":  token.CLASS,
+	"else":   token.ELSE,
+	"false":  token.FALSE,
+	"for":    token.FOR,
+	"fun":    token.FUN,
+	"if":     token.IF,
+	"nil":    token.NIL,
+	"or":     token.OR,
+	"print":  token.PRINT,
+	"return": token.RETURN,
+	"super":  token.SUPER,
+	"this":   token.THIS,
+	"true":   token.TRUE,
+	"var":    token.VAR,
+	"while":  token.WHILE,
+}
+
 type Scanner struct {
 	source  string
 	tokens  []*token.Token
@@ -115,13 +134,33 @@ func (s *Scanner) scanToken(logger *logger.Logger) {
 		case '"':
 			s.string(logger)
 			break;
+		case 'o':
+			if s.match('r') {
+				s.addToken(token.OR)
+			}
+			break;
 		default:
 			if s.isDigit(c) {
 				s.number()
+			} else if s.isAlpha(c) {
+				s.identifier()
 			} else {
 				logger.ErrorReport(s.line, "Unexpected character.");
 			}
 			break;
+	}
+}
+
+func (s *Scanner) identifier() {
+	for s.isAlphaNumeric(s.peek()) {
+		s.advance()
+	}
+
+	text := s.source[s.start:s.current]
+	if t, ok := keywords[text]; ok {
+		s.addToken(t)
+	} else {
+		s.addToken(token.IDENTIFIER)
 	}
 }
 
@@ -190,6 +229,16 @@ func (s *Scanner) peekNext() byte {
 	} else {
 		return s.source[s.current+1]
 	}
+}
+
+func (s *Scanner) isAlpha(c byte) bool {
+	return (c >= 'a' && c <= 'z') ||
+		(c >= 'A' && c <= 'Z') ||
+		c == '_'
+}
+
+func (s *Scanner) isAlphaNumeric(c byte) bool {
+	return s.isAlpha(c) || s.isDigit(c)
 }
 
 func (s *Scanner) isDigit(c byte) bool {
