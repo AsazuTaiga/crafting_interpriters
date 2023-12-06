@@ -70,6 +70,7 @@ impl Lox {
     fn run(&self, source: &String) {
         let mut scanner = Scanner::new(&source);
         let tokens = scanner.scan_tokens(self);
+        print!("{:?}", tokens)
     }
 }
 

@@ -1,8 +1,6 @@
 use crate::token::{Token, TokenType};
 use crate::Lox;
-use std::default;
-use std::iter::Peekable;
-use std::str::Chars;
+use std::collections::HashMap;
 
 /**
 ライフタイムパラメー<'a> の役割:
@@ -112,7 +110,9 @@ impl<'a> Scanner<'a> {
             }
             _ => {
                 if self.is_digit(c) {
-                    self.number(lox)
+                    self.number()
+                } else if self.is_alpha(c) {
+                    self.identifier()
                 } else {
                     Lox::error(lox, self.line, "Unexpected character.");
                 }
@@ -156,6 +156,14 @@ impl<'a> Scanner<'a> {
 
     fn is_digit(&self, c: char) -> bool {
         return c >= '0' && c <= '9';
+    }
+
+    fn is_alpha(&self, c: char) -> bool {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+    }
+
+    fn is_alphanumeric(&self, c: char) -> bool {
+        return self.is_alpha(c) || self.is_digit(c);
     }
 
     fn match_char(&mut self, expected: char) -> bool {
@@ -205,7 +213,7 @@ impl<'a> Scanner<'a> {
         Ok(())
     }
 
-    fn number(&mut self, lox: &Lox) {
+    fn number(&mut self) {
         while self.is_digit(self.peek()) {
             self.advanced();
         }
@@ -219,5 +227,42 @@ impl<'a> Scanner<'a> {
 
         let value = self.source[self.start..self.current].to_string();
         self.add_token_literal(TokenType::Number, Some(Box::new(value)));
+    }
+
+    fn identifier(&mut self) {
+        while self.is_alphanumeric(self.peek()) {
+            self.advanced();
+        }
+
+        let text = self.source[self.start..self.current].to_string();
+        let keyword = self.keywords();
+        let token_type: Option<&TokenType> = keyword.get(&text);
+        let token_type = match token_type {
+            Some(token_type) => token_type,
+            None => &TokenType::Identifier,
+        };
+        self.add_token_literal(token_type.clone(), Some(Box::new(text)));
+    }
+
+    fn keywords(&self) -> HashMap<String, TokenType> {
+        let mut keywords: HashMap<String, TokenType> = HashMap::new();
+        keywords.insert("and".to_string(), TokenType::And);
+        keywords.insert("class".to_string(), TokenType::Class);
+        keywords.insert("else".to_string(), TokenType::Else);
+        keywords.insert("false".to_string(), TokenType::False);
+        keywords.insert("for".to_string(), TokenType::For);
+        keywords.insert("fun".to_string(), TokenType::Fun);
+        keywords.insert("if".to_string(), TokenType::If);
+        keywords.insert("nil".to_string(), TokenType::Nil);
+        keywords.insert("or".to_string(), TokenType::Or);
+        keywords.insert("print".to_string(), TokenType::Print);
+        keywords.insert("return".to_string(), TokenType::Return);
+        keywords.insert("super".to_string(), TokenType::Super);
+        keywords.insert("this".to_string(), TokenType::This);
+        keywords.insert("true".to_string(), TokenType::True);
+        keywords.insert("var".to_string(), TokenType::Var);
+        keywords.insert("while".to_string(), TokenType::While);
+
+        return keywords;
     }
 }
