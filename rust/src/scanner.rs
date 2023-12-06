@@ -33,20 +33,20 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn scan_tokens(&mut self) {
+    pub fn scan_tokens(&mut self, lox: &Lox) -> &Vec<Token> {
         while !self.is_at_end() {
-            start = current;
-            self.scan_token();
+            self.start = self.current;
+            self.scan_token(lox);
         }
 
         self.tokens
-            .push(Token::new(TokenType::EOF, "", None, self.line));
-        return self.tokens;
+            .push(Token::new(TokenType::Eof, "".to_string(), None, self.line));
+        return &self.tokens;
     }
 
     /// トークンをスキャンして
-    pub fn scan_token(&mut self) {
-        let c = self.advanced();
+    pub fn scan_token(&mut self, lox: &Lox) {
+        let c = self.advanced().unwrap();
         match c {
             '(' => self.add_token(TokenType::LeftParen),
             ')' => self.add_token(TokenType::RightParen),
@@ -58,18 +58,20 @@ impl<'a> Scanner<'a> {
             '+' => self.add_token(TokenType::Plus),
             ';' => self.add_token(TokenType::Semicolon),
             '*' => self.add_token(TokenType::Star),
-            _ => Lox::error(self, self.line, "Unexpected character."),
+            _ => {
+                // Lox::error(Lox, self.line, "Unexpected character.");
+            }
         }
     }
 
     /// ソースコードの次の文字をConsumeして、現在の位置を進める。
-    fn advanced(&mut self) -> char {
+    fn advanced(&mut self) -> Option<char> {
         if self.is_at_end() {
             None
         } else {
             let c = self.source.chars().nth(self.current);
             self.current += 1;
-            return Some(c);
+            return c;
         }
     }
 

@@ -69,7 +69,7 @@ impl Lox {
     /// TODO: トークンを表示する構造体とそれらのトークンを生成するScanaer構造体を作成する。
     fn run(&self, source: &String) {
         let mut scanner = Scanner::new(&source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner.scan_tokens(self);
     }
 }
 
@@ -115,12 +115,4 @@ fn main() {
     if *lox.had_error.borrow() {
         process::exit(65);
     }
-}
-
-fn test() {
-    let a: &str = "hello world";
-    // a[0..5]; このコードだとthe size of `str` cannot be statically determinedというエラーがでるので直して
-    a.chars().nth(0..5);
-
-    println!("{}", a)
 }
