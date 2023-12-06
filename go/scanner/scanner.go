@@ -66,9 +66,73 @@ func (s *Scanner) scanToken(logger *logger.Logger) {
 		case '*':
 			s.addToken(token.STAR);
 			break;
+		case '!':
+			if s.match('=') {
+				s.addToken(token.BANG_EQUAL);
+			} else {
+				s.addToken(token.BANG);
+			}
+			break;
+		case '=':
+			if s.match('=') {
+				s.addToken(token.EQUAL_EQUAL)
+			} else {
+				s.addToken(token.EQUAL)
+			}
+			break;
+		case '<':
+			if s.match('=') {
+				s.addToken(token.LESS_EQUAL)
+			} else {
+				s.addToken(token.LESS)
+			}
+			break;
+		case '>':
+			if s.match('=') {
+				s.addToken(token.GREATER_EQUAL)
+			} else {
+				s.addToken(token.GREATER)
+			}
+			break;
+		case '/':
+			if s.match('/') {
+				for s.peek() != '\n' && !s.isAtEnd() {
+					s.advance()
+				}
+			} else {
+				s.addToken(token.SLASH)
+			}
+			break;
+		case ' ':
+		case '\r':
+		case '\t':
+			break;
+		case '\n':
+			s.line++
+			break;
 		default:
 			logger.ErrorReport(s.line, "Unexpected character.");
 			break;
+	}
+}
+
+func (s *Scanner) match(expected byte) bool {
+	if s.isAtEnd() {
+		return false
+	}
+	if s.source[s.current] != expected {
+		return false
+	}
+
+	s.current++
+	return true
+}
+
+func (s *Scanner) peek() byte {
+	if s.isAtEnd() {
+		return '\u0000'
+	} else {
+		return s.source[s.current]
 	}
 }
 
