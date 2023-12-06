@@ -116,3 +116,11 @@ fn main() {
         process::exit(65);
     }
 }
+
+fn test() {
+    let a: &str = "hello world";
+    // a[0..5]; このコードだとthe size of `str` cannot be statically determinedというエラーがでるので直して
+    a.chars().nth(0..5);
+
+    println!("{}", a)
+}
