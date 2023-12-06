@@ -110,10 +110,32 @@ func (s *Scanner) scanToken(logger *logger.Logger) {
 		case '\n':
 			s.line++
 			break;
+		case '"':
+			s.string(logger)
+			break;
 		default:
 			logger.ErrorReport(s.line, "Unexpected character.");
 			break;
 	}
+}
+
+func (s *Scanner) string(logger *logger.Logger) {
+	for s.peek() != '"' && !s.isAtEnd() {
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+
+	if s.isAtEnd() {
+		logger.ErrorReport(s.line, "Unterminated string.")
+		return
+	}
+
+	s.advance()
+
+	value := s.source[s.start+1:s.current-1]
+	s.addTokenWithLiteral(token.STRING, value)
 }
 
 func (s *Scanner) match(expected byte) bool {
