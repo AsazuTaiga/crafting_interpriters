@@ -58,13 +58,69 @@ impl<'a> Scanner<'a> {
             '+' => self.add_token(TokenType::Plus),
             ';' => self.add_token(TokenType::Semicolon),
             '*' => self.add_token(TokenType::Star),
+            '!' => {
+                let token_type = if self.match_char('=') {
+                    TokenType::BangEqual
+                } else {
+                    TokenType::Bang
+                };
+                self.add_token(token_type);
+            }
+            '=' => {
+                let token_type = if self.match_char('=') {
+                    TokenType::EqualEqual
+                } else {
+                    TokenType::Equal
+                };
+
+                self.add_token(token_type);
+            }
+            '<' => {
+                let token_type = if self.match_char('=') {
+                    TokenType::LessEqual
+                } else {
+                    TokenType::Less
+                };
+                self.add_token(token_type);
+            }
+            '>' => {
+                let token_type = if self.match_char('=') {
+                    TokenType::GreaterEqual
+                } else {
+                    TokenType::Greater
+                };
+                self.add_token(token_type)
+            }
+            '/' => {
+                if self.match_char('/') {
+                    // コメントは行末まで読み飛ばす。
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advanced();
+                    }
+                } else {
+                    self.add_token(TokenType::Slash);
+                }
+            }
+            ' ' | '\r' | '\t' => {
+                // 空白文字は無視する。
+            }
+            '\n' => {
+                self.line += 1;
+            }
+            '"' => {
+                self.string(lox).unwrap();
+            }
             _ => {
-                // Lox::error(Lox, self.line, "Unexpected character.");
+                if self.is_digit(c) {
+                    self.number(lox)
+                } else {
+                    Lox::error(lox, self.line, "Unexpected character.");
+                }
             }
         }
     }
 
-    /// ソースコードの次の文字をConsumeして、現在の位置を進める。
+    /// ソースコードの現在の位置の文字を返して、現在の位置を一つ進める。
     fn advanced(&mut self) -> Option<char> {
         if self.is_at_end() {
             None
@@ -93,7 +149,75 @@ impl<'a> Scanner<'a> {
             .push(Token::new(token_type, text, literal, self.line))
     }
 
+    /// ソースコードの最後まで読み込んだかどうかを返す。
     fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
+    }
+
+    fn is_digit(&self, c: char) -> bool {
+        return c >= '0' && c <= '9';
+    }
+
+    fn match_char(&mut self, expected: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+        if self.source.chars().nth(self.current).unwrap() != expected {
+            return false;
+        }
+
+        self.current += 1;
+        return true;
+    }
+
+    // lookahead 先読みするが、現在の位置は進めない。
+    fn peek(&self) -> char {
+        if self.is_at_end() {
+            return '\0'; // 文字列の終端を表す。
+        }
+        return self.source.chars().nth(self.current).unwrap();
+    }
+
+    fn peek_next(&self) -> char {
+        if self.current + 1 >= self.source.len() {
+            return '\0';
+        }
+        return self.source.chars().nth(self.current + 1).unwrap();
+    }
+
+    /// 文字列リテラルをスキャンする。
+    fn string(&mut self, lox: &Lox) -> Result<(), String> {
+        while self.peek() != '\"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advanced();
+        }
+
+        if self.is_at_end() {
+            Lox::error(lox, self.line, "Unterminated string.");
+        }
+        self.advanced();
+
+        let value = self.source[self.start + 1..self.current - 1].to_string();
+        self.add_token_literal(TokenType::String, Some(Box::new(value)));
+
+        Ok(())
+    }
+
+    fn number(&mut self, lox: &Lox) {
+        while self.is_digit(self.peek()) {
+            self.advanced();
+        }
+
+        if self.peek() == '.' && self.is_digit(self.peek_next()) {
+            self.advanced();
+            while self.is_digit(self.peek()) {
+                self.advanced();
+            }
+        }
+
+        let value = self.source[self.start..self.current].to_string();
+        self.add_token_literal(TokenType::Number, Some(Box::new(value)));
     }
 }
