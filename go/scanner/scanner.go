@@ -1,6 +1,8 @@
 package scanner
 
 import (
+	"strconv"
+
 	"github.com/AsazuTaiga/crafting_interpriters/go/logger"
 	"github.com/AsazuTaiga/crafting_interpriters/go/token"
 )
@@ -114,9 +116,33 @@ func (s *Scanner) scanToken(logger *logger.Logger) {
 			s.string(logger)
 			break;
 		default:
-			logger.ErrorReport(s.line, "Unexpected character.");
+			if s.isDigit(c) {
+				s.number()
+			} else {
+				logger.ErrorReport(s.line, "Unexpected character.");
+			}
 			break;
 	}
+}
+
+func (s *Scanner) number() {
+	for s.isDigit(s.peek()) {
+		s.advance()
+	}
+
+	if  s.peek() == '.' && s.isDigit(s.peekNext()) {
+		s.advance()
+
+		for s.isDigit(s.peek()) {
+			s.advance()
+		}
+	}
+
+	val, err := strconv.ParseFloat(s.source[s.start:s.current], 64)
+	if err != nil {
+		panic(err) // NOTE: panicがいいのかはわかってない
+	}
+	s.addTokenWithLiteral(token.NUMBER, val)
 }
 
 func (s *Scanner) string(logger *logger.Logger) {
@@ -156,6 +182,18 @@ func (s *Scanner) peek() byte {
 	} else {
 		return s.source[s.current]
 	}
+}
+
+func (s *Scanner) peekNext() byte {
+	if s.current + 1 >= len(s.source) {
+		return '\u0000'
+	} else {
+		return s.source[s.current+1]
+	}
+}
+
+func (s *Scanner) isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
 }
 
 func (s *Scanner) isAtEnd() bool {
