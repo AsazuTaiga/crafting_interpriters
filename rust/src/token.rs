@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
-enum TokenType {
+pub enum TokenType {
     // Single-character tokens.
     LeftParen,
     RightParen,
@@ -50,7 +50,7 @@ enum TokenType {
 }
 
 #[derive(Debug)]
-struct Token {
+pub struct Token {
     token_type: TokenType,
     lexeme: String,
     literal: Option<Box<dyn std::fmt::Debug>>, // JavaではObject型
@@ -58,7 +58,7 @@ struct Token {
 }
 
 impl Token {
-    fn new(
+    pub fn new(
         token_type: TokenType,
         lexeme: String,
         literal: Option<Box<dyn std::fmt::Debug>>,

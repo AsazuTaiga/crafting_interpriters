@@ -1,6 +1,7 @@
 // このコードでは crafting interpretersという本の内容を写経しています。
 // しかし、本ではサンプルコードがJavaで書かれているので、Rustで書き直しています。
 
+use scanner::Scanner;
 use std::cell::RefCell;
 use std::env;
 use std::fs;
@@ -9,6 +10,7 @@ use std::path::Path;
 use std::process;
 use std::rc::Rc;
 
+mod scanner;
 mod token;
 
 struct Lox {
@@ -66,8 +68,9 @@ impl Lox {
     /// 与えられたソースコードからトークンをスキャンし、それらを一つずつ表示する。
     /// TODO: トークンを表示する構造体とそれらのトークンを生成するScanaer構造体を作成する。
     fn run(&self, source: &String) {
-        // 後で実装する
-        //
+        let mut scanner = Scanner::new(&source);
+        let tokens = scanner.scan_tokens(self);
+        print!("{:?}", tokens)
     }
 }
 
@@ -82,13 +85,11 @@ impl Lox {
 //     }
 //   }
 
-// Rustコード
-struct Scanner {}
-struct Token {}
-
-/// このコードは、コマンドライン引数を受け取り、
-/// 引数が1つの場合はrun_file関数を呼び出し、
-/// 引数がない場合はrun_prompt関数を呼び出している。
+/**
+このコードは、コマンドライン引数を受け取り、
+引数が1つの場合はrun_file関数を呼び出し、
+引数がない場合はrun_prompt関数を呼び出している。
+**/
 fn main() {
     let args: Vec<String> = env::args().collect();
     let lox = Lox::new();
@@ -97,22 +98,22 @@ fn main() {
         2 => {
             if let Err(e) = lox.run_file(&args[1]) {
                 eprintln!("Error running file: {}", e);
-                process::exit(65); // エラーコード65で終了
+                process::exit(65);
             }
         }
         1 => {
             if let Err(e) = lox.run_prompt() {
                 eprintln!("Error running prompt: {}", e);
-                process::exit(66); // エラーコード66で終了
+                process::exit(66);
             }
         }
         _ => {
             println!("Usage: rlox [script]");
-            process::exit(64); // エラーコード64で終了
+            process::exit(64);
         }
     }
 
     if *lox.had_error.borrow() {
-        process::exit(65); // スキャンまたはパースエラーがあった場合の終了コード
+        process::exit(65);
     }
 }
