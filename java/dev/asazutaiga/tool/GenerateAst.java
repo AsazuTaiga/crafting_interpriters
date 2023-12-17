@@ -30,6 +30,8 @@ public class GenerateAst {
     writer.println();
     writer.println("abstract class " + baseName + " {");
 
+    defineVisitor(writer, baseName, types);
+
     // AST クラス
     for (String type : types) {
       String className = type.split(":")[0].trim();
@@ -37,6 +39,9 @@ public class GenerateAst {
       defineType(writer, baseName, className, fields);
       writer.println();
     }
+
+    // accept メソッド
+    writer.println("  abstract <R> R accept(Visitor<R> visitor);");
 
     writer.println("}");
     writer.close();
@@ -59,6 +64,14 @@ public class GenerateAst {
 
     writer.println("    }");
 
+    // Visitor パターン
+    writer.println();
+    writer.println("    @Override");
+    writer.println("    <R> R accept(Visitor<R> visitor) {");
+    writer.println("      return visitor.visit" +
+        className + baseName + "(this);");
+    writer.println("    }");
+
     // フィールド
     writer.println();
     for (String field : fields) {
@@ -66,5 +79,21 @@ public class GenerateAst {
     }
 
     writer.println("  }");
+  }
+
+  private static void defineVisitor(
+      PrintWriter writer, String baseName, List<String> types) {
+    writer.println("  interface Visitor<R> {");
+
+    for (String type : types) {
+      String typeName = type.split(":")[0].trim();
+      writer.println(
+          "    R visit" + typeName + baseName + "(" +
+              typeName + " " + baseName.toLowerCase() + ");");
+      writer.println();
+    }
+
+    writer.println("  }");
+    writer.println();
   }
 }
