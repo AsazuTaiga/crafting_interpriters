@@ -5,10 +5,8 @@ import (
 	"github.com/AsazuTaiga/crafting_interpriters/go/lox"
 )
 
-func main() {
+func Run() {
 	log := logger.NewLogger()
 	l := lox.NewLox(log)
 	l.Run()
 }
-
-
