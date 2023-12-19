@@ -1,6 +1,7 @@
 // このコードでは crafting interpretersという本の内容を写経しています。
 // しかし、本ではサンプルコードがJavaで書かれているので、Rustで書き直しています。
 
+use expr::{AstPrinter, Expr, Literal};
 use scanner::Scanner;
 use std::cell::RefCell;
 use std::env;
@@ -9,7 +10,9 @@ use std::io::{self, BufRead, Write};
 use std::path::Path;
 use std::process;
 use std::rc::Rc;
+use token::TokenType;
 
+mod expr;
 mod scanner;
 mod token;
 
