@@ -27,7 +27,7 @@ public enum TokenType {
   // リテラル
   IDENTIFIER, // 識別子
   STRING, // 文字列
-  NUBMER, // 数値
+  NUMBER, // 数値
 
   // 予約後
   AND, // and
