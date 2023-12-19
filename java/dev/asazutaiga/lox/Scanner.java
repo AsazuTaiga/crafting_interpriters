@@ -162,7 +162,7 @@ class Scanner {
         advance();
     }
 
-    addToken(NUBMER,
+    addToken(NUMBER,
         Double.parseDouble(source.substring(start, current)));
   }
 
