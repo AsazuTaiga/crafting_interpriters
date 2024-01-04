@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 class Lox
 {
+    private static $hadError = false;
+
     /**
      * @param string[] $args
      * @return void
@@ -25,6 +27,7 @@ class Lox
     private static function runFile(string $path): void
     {
         self::run(file_get_contents($path));
+        if (self::$hadError) exit(65);
     }
 
     private static function runPrompt()
@@ -36,6 +39,7 @@ class Lox
             $line = fgets($input);
             if ($line === false) break;
             self::run($line);
+            self::$hadError = false;
         }
     }
 
@@ -47,5 +51,20 @@ class Lox
         foreach ($tokens as $token) {
             echo $token;
         }
+    }
+
+    static function error(int $line, string $message): void
+    {
+        self::report($line, "", $message);
+    }
+
+    private static function report(
+        int $line,
+        string $where,
+        string $message
+    ): void
+    {
+        fputs(STDERR, "[line $line] Error$where: $message");
+        self::$hadError = true;
     }
 }
