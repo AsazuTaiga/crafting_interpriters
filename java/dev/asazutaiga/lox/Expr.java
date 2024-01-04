@@ -2,6 +2,9 @@ package dev.asazutaiga.lox;
 
 import java.util.List;
 
+/**
+ * 式
+ */
 abstract class Expr {
   interface Visitor<R> {
     R visitBinaryExpr(Binary expr);
@@ -14,6 +17,9 @@ abstract class Expr {
 
   }
 
+  /**
+   * 二項式
+   */
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {
       this.left = left;
@@ -31,6 +37,9 @@ abstract class Expr {
     final Expr right;
   }
 
+  /**
+   * グルーピング（括弧）
+   */
   static class Grouping extends Expr {
     Grouping(Expr expression) {
       this.expression = expression;
@@ -44,6 +53,9 @@ abstract class Expr {
     final Expr expression;
   }
 
+  /**
+   * リテラル式
+   */
   static class Literal extends Expr {
     Literal(Object value) {
       this.value = value;
@@ -57,6 +69,9 @@ abstract class Expr {
     final Object value;
   }
 
+  /**
+   * 単項式
+   */
   static class Unary extends Expr {
     Unary(Token operator, Expr right) {
       this.operator = operator;
