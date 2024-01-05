@@ -8,7 +8,7 @@ class Token
     public function __construct(
         private TokenType $type,
         private string $lexeme,
-        private object $literal,
+        private ?object $literal,
         private int $line
     ){}
 
