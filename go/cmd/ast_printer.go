@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/AsazuTaiga/crafting_interpriters/go/ast"
 	"github.com/AsazuTaiga/crafting_interpriters/go/logger"
 	"github.com/AsazuTaiga/crafting_interpriters/go/parser"
@@ -26,7 +28,11 @@ func (p AstPrinter) VisitLiteralExpr(expr ast.LiteralExpr) interface{} {
 	if expr.Value == nil {
 		return "nil"
 	}
-	return expr.Value.(string)
+	v, ok := expr.Value.(string)
+	if !ok {
+		return fmt.Sprintf("%g", expr.Value)
+	}
+	return v
 }
 
 func (p AstPrinter) VisitUnaryExpr(expr ast.UnaryExpr) interface{} {

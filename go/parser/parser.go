@@ -33,7 +33,7 @@ func (p *Parser) equality() ast.Expr {
 	for p.match(token.BANG_EQUAL, token.EQUAL_EQUAL) {
 		operator := p.previous()
 		right := p.comparison()
-		expr = ast.BinaryExpr{Left: expr, Operator: *operator, Right: right}
+		expr = ast.NewBinaryExpr(expr, *operator, right)
 	}
 
 	return expr
@@ -45,11 +45,11 @@ func (p *Parser) comparison() ast.Expr {
 	for p.match(token.GREATER, token.GREATER_EQUAL, token.LESS, token.LESS_EQUAL) {
 		operator := p.previous()
 		right := p.term()
-		expr = ast.BinaryExpr{
-			Left: expr,
-			Operator: *operator,
-			Right: right,
-		}
+		expr = ast.NewBinaryExpr(
+			expr,
+			*operator,
+			right,
+		)
 	}
 
 	return expr
@@ -77,11 +77,11 @@ func (p *Parser) factor() ast.Expr {
 	for p.match(token.SLASH, token.STAR) {
 		token := p.previous()
 		right := p.unary()
-		expr = ast.BinaryExpr{
-			Left: expr,
-			Operator: *token,
-			Right: right,
-		}
+		expr = ast.NewBinaryExpr(
+			expr,
+			*token,
+			right,
+	)
 	}
 
 	return expr
@@ -91,10 +91,10 @@ func (p *Parser) unary() ast.Expr {
 	if p.match(token.BANG, token.MINUS) {
 		operator := p.previous()
 		right := p.unary()
-		return ast.UnaryExpr{
-			Operator: *operator,
-			Right: right,
-		}
+		return ast.NewUnaryExpr(
+			*operator,
+			right,
+		)
 	}
 
 	return p.primary()
@@ -102,23 +102,23 @@ func (p *Parser) unary() ast.Expr {
 
 func (p *Parser) primary() ast.Expr {
 	if p.match(token.FALSE) {
-		return ast.LiteralExpr{Value: false}
+		return ast.NewLiteralExpr(false)
 	}
 	if p.match(token.TRUE) {
-		return ast.LiteralExpr{Value: true}
+		return ast.NewLiteralExpr(true)
 	}
 	if p.match(token.NIL) {
-		return ast.LiteralExpr{Value: nil}
+		return ast.NewLiteralExpr(nil)
 	}
 
 	if p.match(token.NUMBER, token.STRING) {
-		return ast.LiteralExpr{Value: p.previous().Literal}
+		return ast.NewLiteralExpr(p.previous().Literal)
 	}
 
 	if p.match(token.LEFT_PAREN) {
 		expr := p.expression()
 		p.consume(token.RIGHT_PAREN, "Expect ')' after expression.")
-		return ast.GroupingExpr{Expression: expr}
+		return ast.NewGroupingExpr(expr)
 	}
 
 	p.error(p.peek(), "Expect expression.")
