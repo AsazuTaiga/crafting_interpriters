@@ -9,6 +9,24 @@ class Scanner
     private int $start = 0;
     private int $current = 0;
     private int $line = 1;
+    private static array $keywords = [
+        "and" => TokenType::AND,
+        "class" => TokenType::CLASS,
+        "else" => TokenType::ELSE,
+        "false" => TokenType::FALSE,
+        "for" => TokenType::FOR,
+        "fun" => TokenType::FUN,
+        "if" => TokenType::IF,
+        "nil" => TokenType::NIL,
+        "or" => TokenType::OR,
+        "print" => TokenType::PRINT,
+        "return" => TokenType::RETURN,
+        "super" => TokenType::SUPER,
+        "this" => TokenType::THIS,
+        "true" => TokenType::TRUE,
+        "var" => TokenType::VAR,
+        "while" => TokenType::WHILE,
+    ];
     public function __construct(
         private string $source,
     ){}
@@ -102,11 +120,21 @@ class Scanner
             default:
                 if ($this->isDigit($c)) {
                     $this->number();
+                } else if ($this->isAlpha($c)) {
+                    $this->identifier();
                 } else {
                     Lox::error($this->line, 'Unexpected character.');
                 }
                 break;
         }
+    }
+
+    private function identifier(): void
+    {
+        while ($this->isAlphaNumeric($this->peek())) $this->advance();
+        $text = substr($this->source, $this->start, $this->current);
+        $type = self::$keywords[$text] ?? TokenType::IDENTIFIER;
+        $this->addToken($type);
     }
 
     private function number(): void
@@ -166,6 +194,18 @@ class Scanner
     {
         if ($this->current + 1 >= $this->source) return '\0';
         return $this->source[$this->current + 1];
+    }
+
+    private function isAlpha(string $c): bool
+    {
+        return ($c >= 'a' && $c <= 'z') ||
+            ($c >= 'A' && $c <= 'Z') ||
+            $c == '_';
+    }
+
+    private function isAlphaNumeric(string $c): bool
+    {
+        return $this->isAlpha($c) || $this->isDigit($c);
     }
 
     private function isDigit(string $c): bool

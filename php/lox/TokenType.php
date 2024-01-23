@@ -32,6 +32,7 @@ enum TokenType
     case STRING;
     case NUMBER;
     case Keywords;
+    case AND;
     case CLASS;
     case ELSE;
     case FALSE;
