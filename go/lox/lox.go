@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AsazuTaiga/crafting_interpriters/go/interpreter"
 	"github.com/AsazuTaiga/crafting_interpriters/go/logger"
 	"github.com/AsazuTaiga/crafting_interpriters/go/scanner"
 )
 
 type Lox struct {
 	logger *logger.Logger
+	interpreter *interpreter.Interpreter
 }
 
 func NewLox(
@@ -18,6 +20,7 @@ func NewLox(
 ) *Lox {
 	return &Lox{
 		logger: logger,
+		interpreter: interpreter.NewInterpreter(),
 	}
 }
 
