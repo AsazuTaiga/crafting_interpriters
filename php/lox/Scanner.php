@@ -32,26 +32,145 @@ class Scanner
         $c = $this->advance();
         switch ($c) {
             case '(': $this->addToken(TokenType::LEFT_PAREN);
-            break;
+                break;
             case ')': $this->addToken(TokenType::RIGHT_PAREN);
-            break;
+                break;
             case '{': $this->addToken(TokenType::LEFT_BRACE);
-            break;
+                break;
             case '}': $this->addToken(TokenType::RIGHT_BRACE);
-            break;
+                break;
             case ',': $this->addToken(TokenType::COMMA);
-            break;
+                break;
             case '.': $this->addToken(TokenType::DOT);
-            break;
+                break;
             case '-': $this->addToken(TokenType::MINUS);
-            break;
+                break;
             case '+': $this->addToken(TokenType::PLUS);
-            break;
+                break;
             case ';': $this->addToken(TokenType::SEMICOLON);
-            break;
+                break;
             case '*': $this->addToken(TokenType::STAR);
-            break;
+                break;
+            case '!':
+                $this->addToken(
+                    $this->match('=')
+                        ? TokenType::BANG_EQUAL
+                        : TokenType::BANG
+                );
+                break;
+            case '=':
+                $this->addToken(
+                    $this->match('=')
+                        ? TokenType::EQUAL_EQUAL
+                        : TokenType::EQUAL
+                );
+                break;
+            case '<':
+                $this->addToken(
+                    $this->match('=')
+                        ? TokenType::LESS_EQUAL
+                        : TokenType::LESS
+                );
+                break;
+            case '>':
+                $this->addToken(
+                    $this->match('=')
+                        ? TokenType::GREATER_EQUAL
+                        : TokenType::GREATER
+                );
+                break;
+            case '/':
+                if ($this->match('/')) {
+                    // A comment goes until the end of the line.
+                    while ($this->peek() != '\n' && !$this->isAtEnd()) $this->advance();
+                } else {
+                    $this->addToken(TokenType::SLASH);
+                }
+                break;
+
+            case ' ':
+            case '\r':
+            case '\t':
+                // Ignore whitespace.
+                break;
+
+            case '\n':
+                $this->line++;
+                break;
+
+            case '"': $this->string(); break;
+            default:
+                if ($this->isDigit($c)) {
+                    $this->number();
+                } else {
+                    Lox::error($this->line, 'Unexpected character.');
+                }
+                break;
         }
+    }
+
+    private function number(): void
+    {
+        while ($this->isDigit($this->peek())) $this->advance();
+
+        // Look for a fractional part.
+        if ($this->peek() == '.' && $this->isDigit($this->peekNext())) {
+            // Consume the "."
+            $this->advance();
+
+            while ($this->isDigit($this->peek())) $this->advance();
+        }
+
+        $this->addToken(
+            TokenType::NUMBER,
+            floatval(substr($this->source, $this->start, $this->current))
+        );
+    }
+
+    private function string(): void
+    {
+        while ($this->peek() != '"' && !$this->isAtEnd()) {
+            if ($this->peek() == '\n') $this->line++;
+            $this->advance();
+        }
+
+        if ($this->isAtEnd()) {
+            Lox::error($this->line, "Unterminated string.");
+            return;
+        }
+
+        // The closing ".
+        $this->advance();
+
+        // Trim the surrounding quotes.
+        $value = substr($this->source, $this->start + 1, $this->current - 1);
+        $this->addToken(TokenType::STRING, $value);
+    }
+
+    private function match(string $expected): bool
+    {
+        if ($this->isAtEnd()) return false;
+        if ($this->source[$this->current] !== $expected) return false;
+
+        $this->current++;
+        return true;
+    }
+
+    private function peek(): string
+    {
+        if ($this->isAtEnd()) return '\0';
+        return $this->source[$this->current];
+    }
+
+    private function peekNext(): string
+    {
+        if ($this->current + 1 >= $this->source) return '\0';
+        return $this->source[$this->current + 1];
+    }
+
+    private function isDigit(string $c): bool
+    {
+        return $c >= '0' && $c <= '9';
     }
 
     private function isAtEnd(): bool
@@ -64,7 +183,7 @@ class Scanner
         return $this->source[$this->current++];
     }
 
-    private function addToken(TokenType $type, object $literal = null): void
+    private function addToken(TokenType $type, $literal = null): void
     {
         $text = substr($this->source, $this->start, $this->current);
         $this->tokens[] = new Token($type, $text, $literal, $this->line);
