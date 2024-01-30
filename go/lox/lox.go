@@ -77,5 +77,6 @@ func (l *Lox) run(source string) {
 		return
 	}
 
+
 	l.interpreter.Interpret(expr)
 }

@@ -61,11 +61,11 @@ func (p *Parser) term() ast.Expr {
 	for p.match(token.MINUS, token.PLUS) {
 		token := p.previous()
 		right := p.factor()
-		expr = ast.BinaryExpr{
-			Left: expr,
-			Operator: *token,
-			Right: right,
-		}
+		expr = ast.NewBinaryExpr(
+			expr,
+			*token,
+			right,
+		)
 	}
 
 	return expr
