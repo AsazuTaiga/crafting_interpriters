@@ -17,6 +17,7 @@
 - `go/` - by [@tomoyuki-hiranuma](https://github.com/tomoyuki-hiranuma)
 - `java/` - by [@AsazuTaiga](https://github.com/AsazuTaiga)
 - `rust/` - by [@poteboy](https://github.com/poteboy)
+- `php/` - by [@yodaka](https://github.com/yodakaEngineer)
 
 **注意**: 処理系に加えて対象言語の勉強も兼ねているので、実装が間違ってる可能性が大いにあります。
 
