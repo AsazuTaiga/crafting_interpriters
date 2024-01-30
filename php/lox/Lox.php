@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Lox;
+
 class Lox
 {
     private static $hadError = false;
@@ -14,10 +16,10 @@ class Lox
         array $args
     ): void
     {
-        if (count($args) > 1) {
+        if (count($args) > 2) {
             echo ('Usage: jlox [script]');
             exit(64);
-        } else if (count($args) == 1) {
+        } else if (count($args) == 2) {
             self::runFile($args[0]);
         } else {
             self::runPrompt();

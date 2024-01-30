@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Lox;
+
 class Token
 {
 
@@ -14,6 +16,7 @@ class Token
 
     public function __toString(): string
     {
-        return "$this->type $this->lexeme $this->literal";
+        $type = $this->type->name;
+        return "$type $this->lexeme $this->literal";
     }
 }

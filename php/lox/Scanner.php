@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Lox;
+
 class Scanner
 {
     /** @var $tokens Token[] */
@@ -11,7 +13,7 @@ class Scanner
     private int $line = 1;
     private static array $keywords = [
         "and" => TokenType::AND,
-        "class" => TokenType::CLASS,
+        "class" => TokenType::CLAZZ,
         "else" => TokenType::ELSE,
         "false" => TokenType::FALSE,
         "for" => TokenType::FOR,
