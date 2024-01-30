@@ -115,6 +115,7 @@ class Scanner
                 break;
 
             case '\n':
+            case PHP_EOL:
                 $this->line++;
                 break;
 
