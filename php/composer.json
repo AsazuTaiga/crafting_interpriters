@@ -1,0 +1,10 @@
+{
+    "name": "lox/lox",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Lox\\": "lox/"
+        }
+    },
+    "require": {}
+}
