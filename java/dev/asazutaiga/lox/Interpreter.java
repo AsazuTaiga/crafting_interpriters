@@ -1,10 +1,12 @@
 package dev.asazutaiga.lox;
 
+import dev.asazutaiga.lox.Expr.Assign;
 import dev.asazutaiga.lox.Expr.Binary;
 import dev.asazutaiga.lox.Expr.Grouping;
 import dev.asazutaiga.lox.Expr.Literal;
 import dev.asazutaiga.lox.Expr.Unary;
 import dev.asazutaiga.lox.Expr.Variable;
+import dev.asazutaiga.lox.Stmt.Block;
 import dev.asazutaiga.lox.Stmt.Expression;
 import dev.asazutaiga.lox.Stmt.Print;
 import dev.asazutaiga.lox.Stmt.Var;
@@ -177,5 +179,31 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Object visitVariableExpr(Variable expr) {
     return environment.get(expr.name);
+  }
+
+  @Override
+  public Object visitAssignExpr(Assign expr) {
+    Object value = evaluate(expr.value);
+    environment.assign(expr.name, value);
+    return value;
+  }
+
+  @Override
+  public Void visitBlockStmt(Block stmt) {
+    executeBlock(stmt.statements, new Environment(environment));
+    return null;
+  }
+
+  private void executeBlock(List<Stmt> statements, Environment environment) {
+    Environment previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (Stmt statement : statements) {
+        execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
   }
 }
