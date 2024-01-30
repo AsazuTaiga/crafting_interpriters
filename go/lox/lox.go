@@ -7,6 +7,7 @@ import (
 
 	"github.com/AsazuTaiga/crafting_interpriters/go/interpreter"
 	"github.com/AsazuTaiga/crafting_interpriters/go/logger"
+	"github.com/AsazuTaiga/crafting_interpriters/go/parser"
 	"github.com/AsazuTaiga/crafting_interpriters/go/scanner"
 )
 
@@ -18,9 +19,10 @@ type Lox struct {
 func NewLox(
 	logger *logger.Logger,
 ) *Lox {
+	i := interpreter.NewInterpreter()
 	return &Lox{
 		logger: logger,
-		interpreter: interpreter.NewInterpreter(),
+		interpreter: i,
 	}
 }
 
@@ -68,8 +70,12 @@ func (l *Lox) runPrompt() {
 func (l *Lox) run(source string) {
 	s := scanner.NewScanner(source)
 	tokens := s.ScanTokens(l.logger)
+	parser := parser.NewParser(tokens)
+	expr := parser.Parse()
 
-	for _, token := range tokens {
-		fmt.Println(token)
+	if l.logger.HadError() {
+		return
 	}
+
+	l.interpreter.Interpret(expr)
 }
