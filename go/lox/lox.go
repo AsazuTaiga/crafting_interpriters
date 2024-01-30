@@ -25,7 +25,7 @@ func NewLox(
 }
 
 func (l *Lox) Run() {
-	args := os.Args[1:]
+	args := os.Args[2:]
 
 	if len(args) > 1 {
 		fmt.Println("Usage: golox [script]")
