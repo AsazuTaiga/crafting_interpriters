@@ -51,7 +51,7 @@ class Lox
         $tokens = $scanner->scanTokens();
 
         foreach ($tokens as $token) {
-            echo $token;
+            echo $token . "\n";
         }
     }
 

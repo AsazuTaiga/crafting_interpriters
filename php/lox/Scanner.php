@@ -135,7 +135,7 @@ class Scanner
     private function identifier(): void
     {
         while ($this->isAlphaNumeric($this->peek())) $this->advance();
-        $text = substr($this->source, $this->start, $this->current);
+        $text = substr($this->source, $this->start, $this->current - 1);
         $type = self::$keywords[$text] ?? TokenType::IDENTIFIER;
         $this->addToken($type);
     }
@@ -154,7 +154,7 @@ class Scanner
 
         $this->addToken(
             TokenType::NUMBER,
-            floatval(substr($this->source, $this->start, $this->current))
+            floatval(substr($this->source, $this->start, $this->current - 1))
         );
     }
 
@@ -174,7 +174,7 @@ class Scanner
         $this->advance();
 
         // Trim the surrounding quotes.
-        $value = substr($this->source, $this->start + 1, $this->current - 1);
+        $value = substr($this->source, $this->start + 1, $this->current - 2);
         $this->addToken(TokenType::STRING, $value);
     }
 
@@ -228,7 +228,7 @@ class Scanner
 
     private function addToken(TokenType $type, $literal = null): void
     {
-        $text = substr($this->source, $this->start, $this->current);
+        $text = substr($this->source, $this->start, $this->current - 1);
         $this->tokens[] = new Token($type, $text, $literal, $this->line);
     }
 }
