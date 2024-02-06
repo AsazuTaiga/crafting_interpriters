@@ -1,13 +1,23 @@
 package dev.asazutaiga.lox;
 
+import dev.asazutaiga.lox.Expr.Assign;
 import dev.asazutaiga.lox.Expr.Binary;
 import dev.asazutaiga.lox.Expr.Grouping;
 import dev.asazutaiga.lox.Expr.Literal;
 import dev.asazutaiga.lox.Expr.Unary;
+import dev.asazutaiga.lox.Expr.Variable;
+import dev.asazutaiga.lox.Stmt.Block;
+import dev.asazutaiga.lox.Stmt.Expression;
+import dev.asazutaiga.lox.Stmt.Print;
+import dev.asazutaiga.lox.Stmt.Var;
 
 import static dev.asazutaiga.lox.TokenType.*;
 
-public class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
+
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+  private Environment environment = new Environment();
+
   @Override
   public Object visitGroupingExpr(Grouping expr) {
     return evaluate(expr.expression);
@@ -109,13 +119,18 @@ public class Interpreter implements Expr.Visitor<Object> {
     return a.equals(b);
   }
 
-  void interpret(Expr expression) {
+  void interpret(List<Stmt> statements) {
     try {
-      Object value = evaluate(expression);
-      System.out.println(stringify(value));
+      for (Stmt statement : statements) {
+        execute(statement);
+      }
     } catch (RuntimeError error) {
       Lox.runtimeError(error);
     }
+  }
+
+  void execute(Stmt stmt) {
+    stmt.accept(this);
   }
 
   private String stringify(Object object) {
@@ -135,5 +150,60 @@ public class Interpreter implements Expr.Visitor<Object> {
 
   private Object evaluate(Expr expr) {
     return expr.accept(this);
+  }
+
+  @Override
+  public Void visitExpressionStmt(Expression stmt) {
+    evaluate(stmt.expression);
+    return null;
+  }
+
+  @Override
+  public Void visitPrintStmt(Print stmt) {
+    Object value = evaluate(stmt.expression);
+    System.out.println(stringify(value));
+    return null;
+  }
+
+  @Override
+  public Void visitVarStmt(Var stmt) {
+    Object value = null;
+    if (stmt.initializer != null) {
+      value = evaluate(stmt.initializer);
+    }
+
+    environment.define(stmt.name.lexeme, value);
+    return null;
+  }
+
+  @Override
+  public Object visitVariableExpr(Variable expr) {
+    return environment.get(expr.name);
+  }
+
+  @Override
+  public Object visitAssignExpr(Assign expr) {
+    Object value = evaluate(expr.value);
+    environment.assign(expr.name, value);
+    return value;
+  }
+
+  @Override
+  public Void visitBlockStmt(Block stmt) {
+    executeBlock(stmt.statements, new Environment(environment));
+    return null;
+  }
+
+  private void executeBlock(List<Stmt> statements, Environment environment) {
+    Environment previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (Stmt statement : statements) {
+        execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
   }
 }
