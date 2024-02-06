@@ -29,8 +29,8 @@ func NewBinaryExpr(left Expr, operator token.Token, right Expr) *BinaryExpr {
 	}
 }
 
-func (expr BinaryExpr) Accept(visitor Visitor) interface{} {
-	return visitor.VisitBinaryExpr(expr)
+func (expr *BinaryExpr) Accept(visitor Visitor) interface{} {
+	return visitor.VisitBinaryExpr(*expr)
 }
 
 type GroupingExpr struct {
@@ -43,8 +43,8 @@ func NewGroupingExpr(expression Expr) *GroupingExpr {
 	}
 }
 
-func (expr GroupingExpr) Accept(visitor Visitor) interface{} {
-	return visitor.VisitGroupingExpr(expr)
+func (expr *GroupingExpr) Accept(visitor Visitor) interface{} {
+	return visitor.VisitGroupingExpr(*expr)
 }
 
 type LiteralExpr struct {
@@ -57,8 +57,8 @@ func NewLiteralExpr(value interface{}) *LiteralExpr {
 	}
 }
 
-func (expr LiteralExpr) Accept(visitor Visitor) interface{} {
-	return visitor.VisitLiteralExpr(expr)
+func (expr *LiteralExpr) Accept(visitor Visitor) interface{} {
+	return visitor.VisitLiteralExpr(*expr)
 }
 
 type UnaryExpr struct {
@@ -73,8 +73,8 @@ func NewUnaryExpr(operator token.Token, right Expr) *UnaryExpr {
 	}
 }
 
-func (expr UnaryExpr) Accept(visitor Visitor) interface{} {
-	return visitor.VisitUnaryExpr(expr)
+func (expr *UnaryExpr) Accept(visitor Visitor) interface{} {
+	return visitor.VisitUnaryExpr(*expr)
 }
 
 

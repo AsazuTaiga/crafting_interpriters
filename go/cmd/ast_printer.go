@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -9,6 +9,12 @@ import (
 	"github.com/AsazuTaiga/crafting_interpriters/go/scanner"
 	"github.com/AsazuTaiga/crafting_interpriters/go/token"
 )
+
+type AstPrinterCmd struct {}
+
+func NewAstPrinterCmd() *AstPrinterCmd {
+	return &AstPrinterCmd{}
+}
 
 type AstPrinter struct {}
 
@@ -50,7 +56,7 @@ func (p AstPrinter) parenthesize(name string, exprs ...ast.Expr) string {
 }
 
 
-func main() {
+func (c *AstPrinterCmd) Run() {
 	expression := ast.BinaryExpr{
 		Left: &ast.UnaryExpr{
 			Operator: token.Token{

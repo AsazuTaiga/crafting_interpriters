@@ -1,11 +1,18 @@
-package main
+package cmd
 
 import (
 	"github.com/AsazuTaiga/crafting_interpriters/go/logger"
 	"github.com/AsazuTaiga/crafting_interpriters/go/lox"
 )
 
-func Run() {
+type LoxCmd struct {
+}
+
+func NewLoxCmd() *LoxCmd {
+	return &LoxCmd{}
+}
+
+func (cmd *LoxCmd) Run() {
 	log := logger.NewLogger()
 	l := lox.NewLox(log)
 	l.Run()
