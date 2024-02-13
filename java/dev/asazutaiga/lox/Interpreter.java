@@ -8,6 +8,7 @@ import dev.asazutaiga.lox.Expr.Unary;
 import dev.asazutaiga.lox.Expr.Variable;
 import dev.asazutaiga.lox.Stmt.Block;
 import dev.asazutaiga.lox.Stmt.Expression;
+import dev.asazutaiga.lox.Stmt.If;
 import dev.asazutaiga.lox.Stmt.Print;
 import dev.asazutaiga.lox.Stmt.Var;
 
@@ -155,6 +156,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Void visitExpressionStmt(Expression stmt) {
     evaluate(stmt.expression);
+    return null;
+  }
+
+  @Override
+  public Void visitIfStmt(If stmt) {
+    if (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      execute(stmt.elseBranch);
+    }
     return null;
   }
 
