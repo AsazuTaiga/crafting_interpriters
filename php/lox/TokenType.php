@@ -33,7 +33,7 @@ enum TokenType: string
     case IDENTIFIER = 'IDENTIFIER';
     case STRING = 'STRING';
     case NUMBER = 'NUMBER';
-    case Keywords = 'Keywords';
+    case KEYWORDS = 'KEYWORDS';
     case AND = 'AND';
     // case CLASS = 'CLASS'; it's a reserved word in PHP
     case CLAZZ = 'CLAZZ';
