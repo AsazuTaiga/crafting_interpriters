@@ -4,6 +4,23 @@ declare(strict_types=1);
 
 namespace Lox;
 
+/**
+ * javaStyleSubstring
+ * @param $str
+ * @param $beginIndex
+ * @param $endIndex
+ * @return string
+ */
+function substring($str, $beginIndex, $endIndex = null): string
+{
+    if ($endIndex === null) {
+        return substr($str, $beginIndex);
+    } else {
+        $length = $endIndex - $beginIndex;
+        return substr($str, $beginIndex, $length);
+    }
+}
+
 class Scanner
 {
     /** @var $tokens Token[] */
@@ -135,7 +152,7 @@ class Scanner
     private function identifier(): void
     {
         while ($this->isAlphaNumeric($this->peek())) $this->advance();
-        $text = substr($this->source, $this->start, $this->current - 1);
+        $text = substring($this->source, $this->start, $this->current);
         $type = self::$keywords[$text] ?? TokenType::IDENTIFIER;
         $this->addToken($type);
     }
@@ -154,7 +171,7 @@ class Scanner
 
         $this->addToken(
             TokenType::NUMBER,
-            floatval(substr($this->source, $this->start, $this->current - 1))
+            floatval(substring($this->source, $this->start, $this->current))
         );
     }
 
@@ -174,7 +191,7 @@ class Scanner
         $this->advance();
 
         // Trim the surrounding quotes.
-        $value = substr($this->source, $this->start + 1, $this->current - 2);
+        $value = substring($this->source, $this->start + 1, $this->current - 1);
         $this->addToken(TokenType::STRING, $value);
     }
 
@@ -228,7 +245,7 @@ class Scanner
 
     private function addToken(TokenType $type, $literal = null): void
     {
-        $text = substr($this->source, $this->start, $this->current - 1);
+        $text = substring($this->source, $this->start, $this->current);
         $this->tokens[] = new Token($type, $text, $literal, $this->line);
     }
 }
