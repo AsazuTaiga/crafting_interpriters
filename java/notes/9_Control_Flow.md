@@ -31,4 +31,23 @@
 - Interpreterに処理を追加する
 
 ## 論理演算子
-- 
+- `and`, `or` を作る
+  - これらは短絡評価である点で、他の２項演算子と異なる
+  - `false and sideEffect();` みたいな例では右側を評価しないよね
+- BNF
+  ```
+  expression  -> assignment ;
+  assingment  -> IDENTIFIER "=" assignment
+               | logic_or ;
+  logic_or    -> logic_and ( "or" logic_and )* ;
+  logic_and   -> equality ( "and" equality )* ;
+  ```
+  - `assignment` と `equality` の間に `and`, `or` が来る
+- `and`, `or`を表すために`Expr.Binary` クラスを再利用する？（フィールドが同じなため）
+  - 再利用しない
+  - `visitBinaryExpr()`で論理演算子かどうかチェックして短絡評価のハンドリングに分岐する必要があると考えると、クラスを分けてそれぞれのvisitメソッドを作った方がよい
+- GenerateAstに追記して生成、Parserに処理を追加する
+- Interpreterに処理を追加する
+  - 短絡評価になっていることに注意せよ
+    - `visitBinaryExpr` と `visitLogicalOperator` を比較するとよりよくわかる
+    - 前者がとりあえず左辺と右辺を`evaluate`して、演算子の種別ごとに評価しているのに対し、後者は `evaluate(expr.right)` をぎりぎりまで呼ばないようにしてる

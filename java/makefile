@@ -1,4 +1,4 @@
-ARG = ./test/test5.lox
+ARG = ./test/test6.lox
 
 all: 
 	javac dev/asazutaiga/lox/Lox.java
