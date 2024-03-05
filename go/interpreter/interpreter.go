@@ -16,12 +16,13 @@ type Interpreter struct {
 }
 
 func NewInterpreter() *Interpreter {
+	env := environment.NewEnvironment()
 	return &Interpreter{
-		environment: environment.NewEnvironment(),
+		environment: env,
 	}
 }
 
-func(i *Interpreter) Interpret(statements []stmt.Stmt) interface{} {
+func(i *Interpreter) Interpret(statements []ast.Expr) interface{} {
 	for _, statement := range statements {
 		i.execute(statement)
 	}
@@ -159,15 +160,15 @@ func (i *Interpreter) VisitBinaryExpr(expr ast.BinaryExpr) interface{} {
 // 	}
 // }
 
-func (i *Interpreter) execute(stmt stmt.Stmt) {
-	stmt.Accept(i)
+func (i *Interpreter) execute(expr ast.Expr) interface{} {
+	return expr.Accept(i)
 }
 
 func(i *Interpreter) evaluate(expression ast.Expr) interface{} {
 	return expression.Accept(i)
 }
 
-func (i *Interpreter) VisitStatementExpression(stmt stmt.Expression) {
+func (i *Interpreter) VisitExpressionStmt(stmt stmt.Expression) {
 	i.evaluate(stmt.Expression)
 	return
 }
@@ -176,6 +177,21 @@ func (i *Interpreter) VisitPrintStmt(stmt stmt.Print) {
 	value := i.evaluate(stmt.Expression)
 	fmt.Printf("%s\n", stringify(value))
 	return
+}
+
+func (i *Interpreter) VisitVarStmt(stmt stmt.Var) {
+	var value interface{}
+	if stmt.Initializer != nil {
+		value = i.evaluate(stmt.Initializer)
+	}
+	i.environment.Define(stmt.Name.Lexeme, value)
+	return
+}
+
+func (i *Interpreter) VisitAssignExpr(expr ast.AssignExpr) interface{} {
+	value := i.evaluate(expr.Value)
+	i.environment.Assign(expr.Name.String(), value)
+	return value
 }
 
 func  isTruthy(object interface{}) bool {

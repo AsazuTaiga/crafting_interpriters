@@ -59,6 +59,23 @@ func (p *Parser) statement() stmt.Stmt {
 	}
 	return p.expressionStatement()
 }
+func (p *Parser) assignment() ast.Expr {
+	expr := p.equality()
+
+	if p.match(token.EQUAL) {
+		equals := p.previous()
+		value := p.assignment()
+
+		if expr, ok := expr.(*ast.VariableExpr); ok {
+			name := expr.Name
+			return ast.NewAssignExpr(name, value)
+		}
+
+		p.error(equals, "Invalid assignment target.")
+	}
+
+	return expr
+}
 
 func (p *Parser) printStatement() stmt.Stmt {
 	value := p.expression()
