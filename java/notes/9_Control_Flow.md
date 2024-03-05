@@ -51,3 +51,28 @@
   - 短絡評価になっていることに注意せよ
     - `visitBinaryExpr` と `visitLogicalOperator` を比較するとよりよくわかる
     - 前者がとりあえず左辺と右辺を`evaluate`して、演算子の種別ごとに評価しているのに対し、後者は `evaluate(expr.right)` をぎりぎりまで呼ばないようにしてる
+  
+## While ループ
+- for ループより簡単らしい（それはそう）
+- BNF
+  ```
+  statement  -> exprStmt
+              | ifStmt
+              | printStmt
+              | whileStmt
+              | block ;
+  whileStmt  -> "while" "(" expression ")" statement ;
+  ```
+- ルールをGenerateAst.javaに追加する
+- > ここで、式と文に個別の基本クラスを用意することがなぜ良いのかがわかります。フィールド宣言により、条件が式であり本文が文であることが明確になります。
+  - まあそれはそうだが、それはそうだろという感じ（個別の基本クラスを用意しないわけないだろと思っていたので）
+- Parser.javaに以下を追加
+  - 先頭のキーワード `while` を検出して判定し、`whileStatement()`に分岐させる
+  - `whileStatement()` で以下の順にトークンを消費
+    - `(`
+    - `expression()` で条件を取り出す
+    - `)`
+    - `statement()` で本文を取り出す
+    - `return new Stmt.While(condition, body)` する
+- Interpreter.javaに以下を追加
+  - `visitWhileStmt(Stmt.While stmt)` で、Javaのwhile文をそのまま使って、条件がtruthyであるかどうか評価し、その場合には本文を実行

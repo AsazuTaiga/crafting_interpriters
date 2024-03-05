@@ -12,6 +12,7 @@ import dev.asazutaiga.lox.Stmt.Expression;
 import dev.asazutaiga.lox.Stmt.If;
 import dev.asazutaiga.lox.Stmt.Print;
 import dev.asazutaiga.lox.Stmt.Var;
+import dev.asazutaiga.lox.Stmt.While;
 
 import static dev.asazutaiga.lox.TokenType.*;
 
@@ -200,6 +201,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     environment.define(stmt.name.lexeme, value);
+    return null;
+  }
+
+  @Override
+  public Void visitWhileStmt(While stmt) {
+    while (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.body);
+    }
     return null;
   }
 
