@@ -1,6 +1,7 @@
 package dev.asazutaiga.lox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import static dev.asazutaiga.lox.TokenType.*;
 
@@ -93,6 +94,9 @@ class Parser {
   }
 
   private Stmt statement() {
+    if (match(FOR)) {
+      return forStatement();
+    }
     if (match(IF))
       return ifStatement();
     if (match(PRINT))
@@ -103,6 +107,54 @@ class Parser {
       return new Stmt.Block(block());
     }
     return expressionStatement();
+  }
+
+  private Stmt forStatement() {
+    consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+    Stmt initializer = null;
+    if (match(SEMICOLON)) {
+      initializer = null;
+    } else if (match(VAR)) {
+      initializer = varDeclaration();
+    } else {
+      initializer = expressionStatement();
+    }
+
+    Expr condition = null;
+    if (!check(SEMICOLON)) {
+      condition = expression();
+    }
+    consume(SEMICOLON, "Expect ';' after loop condition.");
+
+    Expr increment = null;
+    if (!check(RIGHT_PAREN)) {
+      increment = expression();
+    }
+    consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    Stmt body = statement();
+
+    // 以下、 desugaring (脱糖)
+    if (increment != null) {
+      // increment がある場合は、 body のあとに実行するようにする
+      // (ブロックとして囲む)
+      body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+    }
+
+    if (condition == null) {
+      // condition がない場合は、常に true として扱う
+      condition = new Expr.Literal(true);
+    }
+    // condition + body の While ループとして扱う
+    body = new Stmt.While(condition, body);
+
+    if (initializer != null) {
+      // initializer がある場合は、現在の body (ループ)よりも前にする
+      body = new Stmt.Block(Arrays.asList(initializer, body));
+    }
+
+    return body;
   }
 
   private Stmt ifStatement() {
