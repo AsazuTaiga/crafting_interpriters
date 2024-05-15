@@ -6,18 +6,27 @@ import (
 	"strings"
 
 	"github.com/AsazuTaiga/crafting_interpriters/go/ast"
+	"github.com/AsazuTaiga/crafting_interpriters/go/environment"
+	"github.com/AsazuTaiga/crafting_interpriters/go/stmt"
 	"github.com/AsazuTaiga/crafting_interpriters/go/token"
 )
 
-type Interpreter struct {}
-
-func NewInterpreter() *Interpreter {
-	return &Interpreter{}
+type Interpreter struct {
+	environment *environment.Environment
 }
 
-func(i *Interpreter) Interpret(expression ast.Expr) interface{} {
-	value:= i.evaluate(expression)
-	return fmt.Sprintf("%s", stringify(value))
+func NewInterpreter() *Interpreter {
+	env := environment.NewEnvironment()
+	return &Interpreter{
+		environment: env,
+	}
+}
+
+func(i *Interpreter) Interpret(statements []ast.Expr) interface{} {
+	for _, statement := range statements {
+		i.execute(statement)
+	}
+	return nil
 }
 
 func (i *Interpreter) VisitLiteralExpr(expr ast.LiteralExpr) interface{} {
@@ -44,6 +53,16 @@ func (i *Interpreter) VisitUnaryExpr(expr ast.UnaryExpr) interface{} {
 	}
 
 	return nil
+}
+
+func (i *Interpreter) VisitVariableExpr(expr ast.VariableExpr) interface{} {
+	name, ok := i.environment.Get(expr.Name.String())
+	if !ok {
+		err := errors.New(fmt.Sprintf("Error: %s", "Undefined variable '"+expr.Name.String()+"'."))
+		fmt.Printf("%s\n", err)
+		return nil
+	}
+	return name
 }
 
 func (i *Interpreter) VisitBinaryExpr(expr ast.BinaryExpr) interface{} {
@@ -125,8 +144,54 @@ func (i *Interpreter) VisitBinaryExpr(expr ast.BinaryExpr) interface{} {
 	return nil
 }
 
-func(i *Interpreter) evaluate(expr ast.Expr) interface{} {
+// func (i Interpreter) VisitBlock(block *stmt.Block) {
+// 	i.executeBlock(block.Statements, newEnvironment(i.env))
+// }
+
+// func (i Interpreter) executeBlock(statements []stmt.Stmt, env environment) {
+// 	previousEnv := i.env
+// 	defer func() {
+// 		i.env = previousEnv
+// 	}()
+
+// 	i.env = &env
+// 	for _, statement := range statements {
+// 		i.execute(statement)
+// 	}
+// }
+
+func (i *Interpreter) execute(expr ast.Expr) interface{} {
 	return expr.Accept(i)
+}
+
+func(i *Interpreter) evaluate(expression ast.Expr) interface{} {
+	return expression.Accept(i)
+}
+
+func (i *Interpreter) VisitExpressionStmt(stmt stmt.Expression) {
+	i.evaluate(stmt.Expression)
+	return
+}
+
+func (i *Interpreter) VisitPrintStmt(stmt stmt.Print) {
+	value := i.evaluate(stmt.Expression)
+	fmt.Printf("%s\n", stringify(value))
+	return
+}
+
+func (i *Interpreter) VisitVarStmt(stmt stmt.Var) {
+	var value interface{}
+	if stmt.Initializer != nil {
+		value = i.evaluate(stmt.Initializer)
+	}
+	i.environment.Define(stmt.Name.Lexeme, value)
+	return
+}
+
+func (i *Interpreter) VisitAssignExpr(expr ast.AssignExpr) interface{} {
+	value := i.evaluate(expr.Value)
+	i.environment.Assign(expr.Name.String(), value)
+	return value
 }
 
 func  isTruthy(object interface{}) bool {
